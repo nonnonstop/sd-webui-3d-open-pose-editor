@@ -14,6 +14,8 @@ except NameError:
 
     root_path = pathlib.Path(inspect.getfile(lambda: None)).resolve().parents[1]
 
+css_path = root_path / "style.css"
+
 
 def get_asset_url(
     file_path: pathlib.Path, append: typing.Optional[dict[str, str]] = None
@@ -83,6 +85,7 @@ def create_ui():
         with gr.Tab(label="Edit Openpose"):
             gr.HTML(
                 f"""
+                <style>{css_path.read_text()}</style>
                 <iframe id="openpose3d_iframe" src="{html.escape(html_url)}"></iframe>
                 """
             )
@@ -206,7 +209,6 @@ def on_ui_settings():
 
 def main():
     js_path = root_path / "javascript" / "index.js"
-    css_path = root_path / "style.css"
 
     original_template_response = gr.routes.templates.TemplateResponse
     head = """
