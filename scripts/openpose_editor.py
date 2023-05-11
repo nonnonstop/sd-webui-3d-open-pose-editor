@@ -2,7 +2,7 @@ import html
 import json
 import os.path
 import pathlib
-import typing
+from typing import Optional, Dict
 import urllib.parse
 
 import gradio as gr
@@ -16,7 +16,7 @@ except NameError:
 
 
 def get_asset_url(
-    file_path: pathlib.Path, append: typing.Optional[dict[str, str]] = None
+    file_path: pathlib.Path, append: Optional[Dict[str, str]] = None
 ) -> str:
     if append is None:
         append = {"v": str(os.path.getmtime(file_path))}
