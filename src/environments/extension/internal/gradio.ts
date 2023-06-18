@@ -46,10 +46,13 @@ export const updateGradioImage = async (
     const dt = new DataTransfer()
     dt.items.add(file)
 
-    element
-        .querySelector<HTMLButtonElement>("button[aria-label='Clear']")
-        ?.click()
-    await waitForElementToBeRemoved(element, "button[aria-label='Clear']")
+    const removeImage = element
+        .querySelector<HTMLButtonElement>("button[aria-label='Remove Image']")
+    if (removeImage) {
+        removeImage?.click()
+        await waitForElementToBeRemoved(element, "button[aria-label='Clear']")
+    }
+    await waitForElementToBeInDocument(element, "input[type='file']");
     const input = element.querySelector<HTMLInputElement>("input[type='file']")!
     input.value = ''
     input.files = dt.files

@@ -5,6 +5,7 @@ import {
     switchGradioTab,
     updateGradioImage,
     waitForElementToBeInDocument,
+    waitForElementToBeRemoved,
 } from './internal/gradio'
 import {
     AddMessageEventListener,
@@ -55,8 +56,9 @@ onUiLoaded(async () => {
         } else {
             openGradioAccordion(element)
         }
-        await waitForElementToBeInDocument(element, 'div[data-testid="image"]')
-        const imageElems = element.querySelectorAll('div[data-testid="image"]')
+        const tabSelector = '#txt2img_controlnet_tabs > div.gradio-tabitem'
+        await waitForElementToBeInDocument(element, tabSelector);
+        const imageElems = element.querySelectorAll(tabSelector);
         const tabsElem = element.querySelector('.tab-nav')
         if (poseImage && poseTarget != '' && poseTarget != '-') {
             const tabIndex = Number(poseTarget)
@@ -169,7 +171,32 @@ onUiLoaded(async () => {
                 const element = gradioApp().querySelector(
                     `#openpose3d_${name}_image`
                 )!
-                await updateGradioImage(element, url, name + '.png')
+                const updateImage = async (
+                    element: Element,
+                    url: string,
+                    name: string
+                ) => {
+                    const blob = await (await fetch(url)).blob()
+                    const file = new File([blob], name)
+                    const dt = new DataTransfer()
+                    dt.items.add(file)
+                
+                    element
+                        .querySelector<HTMLButtonElement>("button[aria-label='Clear']")
+                        ?.click()
+                    await waitForElementToBeRemoved(element, "button[aria-label='Clear']")
+                    const input = element.querySelector<HTMLInputElement>("input[type='file']")!
+                    input.value = ''
+                    input.files = dt.files
+                    input.dispatchEvent(
+                        new Event('change', {
+                            bubbles: true,
+                            composed: true,
+                        })
+                    )
+                    await waitForElementToBeInDocument(element, "button[aria-label='Clear']")
+                }
+                await updateImage(element, url, name + '.png')
             }
             const tabs = gradioApp().querySelector('#openpose3d_main')!
             switchGradioTab(tabs, 1)
